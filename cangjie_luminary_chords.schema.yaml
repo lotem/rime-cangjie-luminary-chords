@@ -1,0 +1,154 @@
+# Rime schema
+# encoding: utf-8
+
+schema:
+  schema_id: cangjie_luminary_chords
+  name: 倉頡七曜並擊
+  version: '1.0'
+  author:
+    - 居戎氏 <chen.sst@gmail.com>
+  description: |
+    倉頡並擊方案
+
+    倉頡七曜佈局：
+
+    人 心 手 口 卜  卜 口 手 心 人
+    金 木 水 火 土  土 火 水 木 金
+    竹 戈 中 一 弓  弓 一 中 戈 竹
+
+    二指並擊：
+
+    日＝水火
+    月＝金木
+
+    十＝中一
+    大＝竹戈
+
+    尸＝人心
+    廿＝心手
+    山＝木水
+    女＝戈中
+    田＝手口
+
+    三指並擊：
+
+    難＝木水火
+
+  dependencies:
+    - quick5
+
+switches:
+  - name: ascii_mode
+    reset: 0
+    states: [ 中文, 西文 ]
+  - name: full_shape
+    states: [ 半角, 全角 ]
+  - name: simplification
+    states: [ 漢字, 汉字 ]
+  - name: ascii_punct
+    states: [ 。，, ．， ]
+
+engine:
+  processors:
+    - ascii_composer
+    - recognizer
+    - chord_composer  # 實現並擊按鍵處理
+    - key_binder
+    - speller
+    - punctuator
+    - selector
+    - navigator
+    - express_editor
+  segmentors:
+    - ascii_segmentor
+    - matcher
+    - abc_segmentor
+    - punct_segmentor
+    - fallback_segmentor
+  translators:
+    - punct_translator
+    - script_translator
+  filters:
+    - simplifier
+    - uniquifier
+
+chord_composer:
+  alphabet: 'asdfgzxcvbqwert;lkjh/.,mnpoiuy '
+  algebra:
+    - 'xlit|asdfgzxcvbqwert;lkjh/.,mnpoiuy |CDEFGHILMNOPQRYcdefghilmnopqry_|'
+    # 單擊標點符號
+    - xform|^h$|/|
+    - xform|^i$|.|
+    - xform|^l$|,|
+    - xform|^c$|;|
+    # 單擊空格
+    - 'xform|^_$| |'
+    # 單碼字，可與空格並擊
+    - xform/^([A-Z]+)(_?)$/\L$1$2/
+    - xform/^([a-z]+)(_?)$/$1$2/
+    # 首尾二碼，暫以 : 分隔避免混淆
+    - xform/^([A-Z]+)([a-z]+)(_?)$/\L$1:$2$3/
+    # 轉換並擊倉頡字母
+    - xform/def/x/  # 難
+    - xform/pqr/x/  # 止
+    - xform/ilm/z/  # 片
+    - xform/ef/a/   # 日
+    - xform/cd/b/   # 月
+    - xform/lm/j/   # 十
+    - xform/hi/k/   # 大
+    - xform/op/s/   # 尸
+    - xform/pq/t/   # 廿
+    - xform/de/u/   # 山
+    - xform/il/v/   # 女
+    - xform/qr/w/   # 田
+    # 刪去首尾分隔符
+    - xform/://
+    # ① 並擊空格，分隔編碼
+    - "xlit|_|'|"
+    # ② 並擊空格，上屏
+    # - "xlit|_| |"
+
+  # 並擊完成後套用的式樣
+  output_format:
+
+  # 並擊過程中套用的式樣
+  prompt_format:
+    - "xlit|abcdefghijklmnopqrstuvwxyz |日月金木水火土竹戈十大中一弓人心手口尸廿山女田難卜符·|"
+
+editor:
+  bindings:
+    # 退格鍵刪除一個拼音音節
+    BackSpace: back_syllable
+
+speller:
+  alphabet: zyxwvutsrqponmlkjihgfedcba
+  delimiter: " '"
+  algebra:
+    - 'derive/^([^z])\w+(\w)$/$1$2/'  # 取倉頡首尾二碼爲速成碼
+
+translator:
+  dictionary: quick5
+  prism: cangjie_luminary_chords
+  preedit_format:
+    - "xlit|abcdefghijklmnopqrstuvwxyz'|日月金木水火土竹戈十大中一弓人心手口尸廿山女田難卜符·|"
+  comment_format:
+    - "xlit|abcdefghijklmnopqrstuvwxyz~|日月金木水火土竹戈十大中一弓人心手口尸廿山女田難卜符～|"
+  disable_user_dict_for_patterns:
+    - "^z.*$"
+    - "^yyy.*$"
+
+punctuator:
+  import_preset: default
+
+key_binder:
+  import_preset: default
+
+recognizer:
+  import_preset: default
+
+__patch:
+  # 使用八股文語言模型
+  - grammar:/hant_char?
+
+  # 用家自選配置
+  - cangjie_luminary_chords.custom:/patch?
