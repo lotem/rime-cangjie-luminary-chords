@@ -4,7 +4,7 @@
 schema:
   schema_id: cangjie_luminary_chords
   name: 倉頡七曜並擊
-  version: '1.0'
+  version: '1.1'
   author:
     - 居戎氏 <chen.sst@gmail.com>
   description: |
@@ -83,7 +83,7 @@ chord_composer:
     - xform|^c$|;|
     # 單擊空格
     - 'xform|^_$| |'
-    # 單碼字，可與空格並擊
+    # 單碼字
     - xform/^([A-Z]+)(_?)$/\L$1$2/
     - xform/^([a-z]+)(_?)$/$1$2/
     # 首尾二碼，暫以 : 分隔避免混淆
@@ -103,34 +103,45 @@ chord_composer:
     - xform/qr/w/   # 田
     # 刪去首尾分隔符
     - xform/://
-    # ① 並擊空格，分隔編碼
-    - "xlit|_|'|"
-    # ② 並擊空格，上屏
-    # - "xlit|_| |"
+    # 並擊空格立即上屏
+    - "xlit|_| |"
 
   # 並擊完成後套用的式樣
   output_format:
+    # 後加結束符號
+    - xform/^([a-z]+)([ ]?)$/$1'$2/
 
   # 並擊過程中套用的式樣
   prompt_format:
     - "xlit|abcdefghijklmnopqrstuvwxyz |日月金木水火土竹戈十大中一弓人心手口尸廿山女田難卜符·|"
+    - 'xform/^(.*)$/[$1]/'
+
+  # 回車鍵上屏按鍵序列
+  bindings:
+    Return: commit_raw_input
 
 editor:
   bindings:
-    # 退格鍵刪除一個拼音音節
+    # 退格鍵刪除一個字
     BackSpace: back_syllable
 
 speller:
-  alphabet: zyxwvutsrqponmlkjihgfedcba
-  delimiter: " '"
+  alphabet: "zyxwvutsrqponmlkjihgfedcba'"
+  initials: "zyxwvutsrqponmlkjihgfedcba"
+  finals: "'"
+  delimiter: " "
   algebra:
-    - 'derive/^([^z])\w+(\w)$/$1$2/'  # 取倉頡首尾二碼爲速成碼
+    # 取倉頡首尾二碼爲速成碼
+    - 'derive/^([^z])\w+(\w)$/$1$2/'
+    # 一律後加結束符號，避免切分歧義
+    - "xform/^([a-z]+)$/$1'/"
 
 translator:
   dictionary: quick5
   prism: cangjie_luminary_chords
   preedit_format:
-    - "xlit|abcdefghijklmnopqrstuvwxyz'|日月金木水火土竹戈十大中一弓人心手口尸廿山女田難卜符·|"
+    - "xform/'//"
+    - "xlit|abcdefghijklmnopqrstuvwxyz|日月金木水火土竹戈十大中一弓人心手口尸廿山女田難卜符|"
   comment_format:
     - "xlit|abcdefghijklmnopqrstuvwxyz~|日月金木水火土竹戈十大中一弓人心手口尸廿山女田難卜符～|"
   disable_user_dict_for_patterns:
