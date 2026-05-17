@@ -12,7 +12,8 @@
 
 ### 指法演示
 
-  - 暫無
+  - [並擊輸入倉頡碼，高鐵旅途練鍵，實機打字演示](https://www.bilibili.com/video/BV1K5RCBNEPL/)
+  - [鍵道·破執　倉頡七曜並擊錄入](https://www.bilibili.com/video/BV1T15L6ZEGs/)
 
 ### 鍵盤佈局
 
